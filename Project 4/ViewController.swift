@@ -30,10 +30,14 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         progressView = UIProgressView(progressViewStyle: .default)
         progressView.sizeToFit()
+        
         let progressButton = UIBarButtonItem(customView: progressView)
         
+        let back = UIBarButtonItem(title: "⬅️", style: .plain, target: webView, action: #selector(webView.goBack))
         
-        toolbarItems = [progressButton, spacer, refresh]
+        let forward = UIBarButtonItem(title: "➡️", style: .plain, target: webView, action: #selector(webView.goForward))
+        
+        toolbarItems = [progressButton, spacer, back, forward, refresh]
         navigationController?.isToolbarHidden = false
         
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
@@ -83,7 +87,9 @@ class ViewController: UIViewController, WKNavigationDelegate {
                 }
             }
         }
-        
+        let websiteBlocked = UIAlertController(title: "WARNING!", message: "This website is blocked", preferredStyle: .alert)
+        websiteBlocked.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(websiteBlocked, animated: true)
         decisionHandler(.cancel)
     }
 }
