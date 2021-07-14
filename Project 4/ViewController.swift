@@ -11,7 +11,8 @@ import WebKit
 class ViewController: UIViewController, WKNavigationDelegate {
     var webView: WKWebView!
     var progressView: UIProgressView!
-    var websites = [ "google.com", "apple.com", "hackingwithswift.com"]
+    var websiteToLoad: String?
+    var websites = ["hackingwithswift.com", "apple.com", "google.com"]
     
     override func loadView() {
         webView = WKWebView()
@@ -22,7 +23,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
+        navigationController?.navigationBar.prefersLargeTitles = false
         
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         
@@ -42,21 +43,9 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         
-        let url = URL(string: "https://" + websites[0])!
+        let url = URL(string: "https://" + websiteToLoad!)!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
-    }
-    
-    @objc func openTapped() {
-        let ac = UIAlertController(title: "Open page...", message: nil, preferredStyle: .actionSheet)
-        
-        for website in websites {
-            ac.addAction(UIAlertAction(title: website, style: .default, handler: openPage))
-        }
-        
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        ac.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
-        present(ac, animated: true)
     }
     
     func openPage(action: UIAlertAction) {
@@ -80,16 +69,16 @@ class ViewController: UIViewController, WKNavigationDelegate {
         let url = navigationAction.request.url
         
         if let host = url?.host {
-            for website in websites {
-                if host.contains(website) {
-                    decisionHandler(.allow)
-                    return
-                }
+            if host.contains(websiteToLoad!) {
+                decisionHandler(.allow)
+                return
             }
         }
-        let websiteBlocked = UIAlertController(title: "WARNING!", message: "This website is blocked", preferredStyle: .alert)
-        websiteBlocked.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        let websiteBlocked = UIAlertController(title: "WARNING!", message: "This website is not secure.", preferredStyle: .alert)
+        websiteBlocked.addAction(UIAlertAction(title: "OK", style: .cancel))
         present(websiteBlocked, animated: true)
         decisionHandler(.cancel)
     }
+    
 }
